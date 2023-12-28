@@ -1,7 +1,19 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
+﻿using Algorithmic_Trading.Database;
+using Algorithmic_Trading.Services;
+using Microsoft.EntityFrameworkCore;
+using Yahoo.Finance;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+var x = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddSingleton<HistoricalDataProvider>();
+builder.Services.AddScoped<IStockDataService, StockDataService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -11,21 +23,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapControllers();
+
 app.Run();
-
-/*
-using Yahoo.Finance;
-var hdp = new HistoricalDataProvider();
-
-hdp.DownloadHistoricalDataAsync("MSFT", new DateTime(2010, 1, 1), new DateTime(2010, 1, 31)).Wait();
-
-if (hdp.DownloadResult == HistoricalDataDownloadResult.Successful)
-{
-    var result = hdp.HistoricalData;
-
-    foreach (var item in result)
-    {
-        Console.WriteLine($"{item.Date} {item.Open} {item.High} {item.Low} {item.Close} {item.Volume}");
-    }
-}
-*/
