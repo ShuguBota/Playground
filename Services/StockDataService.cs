@@ -1,29 +1,27 @@
-using Algorithmic_Trading.Database;
 using Algorithmic_Trading.Models;
+using Algorithmic_Trading.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Yahoo.Finance;
 
 namespace Algorithmic_Trading.Services;
 
-// TODO: Refactor this class to not have the dbcontext and put all the db stuff in Database folder
 public class StockDataService : IStockDataService
 {
     private readonly HistoricalDataProvider _hdp;
-    private readonly DatabaseContext _context;
+    private readonly IStockDataRepository _stockDataRepository;
 
-    public StockDataService(HistoricalDataProvider hdp, DatabaseContext context)
+    public StockDataService(HistoricalDataProvider hdp, IStockDataRepository stockDataRepository)
     {
         _hdp = hdp;
-        _context = context;
+        _stockDataRepository = stockDataRepository;
     }
 
     public async Task<List<StockData>> GetStockData(string ticker, DateTime startDate, DateTime endDate)
     {
-        var dates = GetDates(startDate, endDate);
+        var dates = DatesService.GetDatesInRange(startDate, endDate);
+        (startDate, endDate) = DatesService.EnsureDateTimeKind(startDate, endDate);
 
-        var data = await _context.Stocks
-            .Where(stock => stock.Ticker == ticker && dates.Contains(stock.Date))
-            .ToListAsync();
+        var data = await _stockDataRepository.GetStockForDates(ticker, dates).ToListAsync();
 
         if (data.Count == dates.Count)
         {
@@ -35,6 +33,7 @@ public class StockDataService : IStockDataService
         // TODO: Make sure that you downlaod only the dates are not found in the db and not the whole range
         await _hdp.DownloadHistoricalDataAsync(ticker, startDate, endDate);
 
+        // TODO: Make this a separate service
         if (_hdp.DownloadResult == HistoricalDataDownloadResult.Successful)
         {
             var records = _hdp.HistoricalData
@@ -45,27 +44,15 @@ public class StockDataService : IStockDataService
             records.ForEach(record => record.Date = record.Date.ToUniversalTime());
 
             if(records.Count > 0){
-                _context.Stocks.AddRange(records);
-                await _context.SaveChangesAsync();
+                _stockDataRepository.AddRange(records);
+                await _stockDataRepository.Save();
             }
 
-            data = await _context.Stocks
-                .Where(stock => stock.Ticker == ticker && stock.Date >= startDate.ToUniversalTime() && stock.Date <= endDate.ToUniversalTime())
-                .ToListAsync();
+            data = await _stockDataRepository.GetStockForDates(ticker, startDate, endDate).ToListAsync();
             
             return data;
         }
 
         throw new Exception("Failed to download historical data");
-    }
-
-    // TODO: Make a way to check for holidays where the market is closed
-    public List<DateTime> GetDates(DateTime startDate, DateTime endDate){
-        startDate = startDate.ToUniversalTime();
-
-        return Enumerable.Range(0, endDate.Subtract(startDate).Days + 1)
-                    .Select(offset => startDate.AddDays(offset))
-                    .Where(date => date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
-                    .ToList();
     }
 }
