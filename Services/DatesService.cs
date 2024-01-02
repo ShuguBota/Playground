@@ -1,3 +1,5 @@
+using Algorithmic_Trading.Models;
+
 namespace Algorithmic_Trading.Services;
 
 public class DatesService
@@ -17,6 +19,14 @@ public class DatesService
         }
 
         return dates;
+    }
+
+    public static StockData EnsureDateTimeKind(StockData stockData){
+        if(stockData.Date.Kind != DateTimeKind.Utc){
+            stockData.Date = DateTime.SpecifyKind(stockData.Date, DateTimeKind.Utc);
+        }
+
+        return stockData;
     }
 
     public static (DateTime, DateTime) EnsureDateTimeKind(DateTime startDate, DateTime endDate){
@@ -39,5 +49,17 @@ public class DatesService
         });
 
         return dates;
+    }
+
+    public static List<(DateTime startDate, DateTime endDate)> GetStartEndDates(List<DateTime> dates){
+        if(dates.Count == 0){
+            return new List<(DateTime startDate, DateTime endDate)>();
+        }
+
+        return dates
+            .Select((date, index) => new { date, index })
+            .GroupBy(x => x.date.Date.AddDays(-x.index))
+            .Select(group => (group.First().date, group.Last().date))
+            .ToList();
     }
 }

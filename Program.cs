@@ -12,9 +12,11 @@ var x = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSingleton<HistoricalDataProvider>();
-builder.Services.AddScoped<IStockDataService, StockDataService>();
 builder.Services.AddScoped<IStockDataRepository, StockDataRepository>();
+builder.Services.AddScoped<IStockDataService, StockDataService>();
+
+builder.Services.AddSingleton<HistoricalDataProvider>();
+builder.Services.AddSingleton<IYFinanceService, YFinanceService>();
 
 var app = builder.Build();
 

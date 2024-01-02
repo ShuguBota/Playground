@@ -1,19 +1,18 @@
 using Algorithmic_Trading.Models;
 using Algorithmic_Trading.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Yahoo.Finance;
 
 namespace Algorithmic_Trading.Services;
 
 public class StockDataService : IStockDataService
 {
-    private readonly HistoricalDataProvider _hdp;
     private readonly IStockDataRepository _stockDataRepository;
+    private readonly IYFinanceService _yFinanceService;
 
-    public StockDataService(HistoricalDataProvider hdp, IStockDataRepository stockDataRepository)
+    public StockDataService(IStockDataRepository stockDataRepository, IYFinanceService yFinanceService)
     {
-        _hdp = hdp;
         _stockDataRepository = stockDataRepository;
+        _yFinanceService = yFinanceService;
     }
 
     public async Task<List<StockData>> GetStockData(string ticker, DateTime startDate, DateTime endDate)
@@ -21,38 +20,36 @@ public class StockDataService : IStockDataService
         var dates = DatesService.GetDatesInRange(startDate, endDate);
         (startDate, endDate) = DatesService.EnsureDateTimeKind(startDate, endDate);
 
-        var data = await _stockDataRepository.GetStockForDates(ticker, dates).ToListAsync();
+        var data = _stockDataRepository.GetStockForDates(ticker, startDate, endDate);
 
-        if (data.Count == dates.Count)
+        if (data.Count() == dates.Count)
         {
-            return data;
+            return await data.ToListAsync();
         }
 
+        // TODO: Make sure that dates that were tried before are not tried agian at another request
         dates.RemoveAll(date => data.Any(stock => stock.Date == date));
-        
-        // TODO: Make sure that you downlaod only the dates are not found in the db and not the whole range
-        await _hdp.DownloadHistoricalDataAsync(ticker, startDate, endDate);
 
-        // TODO: Make this a separate service
-        if (_hdp.DownloadResult == HistoricalDataDownloadResult.Successful)
+        var toDownloadDates = DatesService.GetStartEndDates(dates);
+
+        foreach (var dateRange in toDownloadDates)
         {
-            var records = _hdp.HistoricalData
-                .Where(record => dates.Contains(record.Date))
-                .Select(record => new StockData(ticker, record))
-                .ToList();
-
-            records.ForEach(record => record.Date = record.Date.ToUniversalTime());
-
-            if(records.Count > 0){
-                _stockDataRepository.AddRange(records);
-                await _stockDataRepository.Save();
+            try 
+            {
+                var downloadData = await _yFinanceService.DownloadHistoricalData(ticker, dateRange.startDate, dateRange.endDate);
+                _stockDataRepository.AddRange(downloadData);
+                data = data.Union(downloadData);
+                break;
+            } 
+            catch (Exception ex) 
+            {
+                // TODO: Change to log and make proper exceptions
+                Console.WriteLine(ex.Message);
             }
-
-            data = await _stockDataRepository.GetStockForDates(ticker, startDate, endDate).ToListAsync();
-            
-            return data;
         }
 
-        throw new Exception("Failed to download historical data");
+        await _stockDataRepository.Save();;
+        
+        return await data.ToListAsync();
     }
 }
