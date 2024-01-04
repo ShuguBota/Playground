@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Algorithmic_Trading.Models;
 using Algorithmic_Trading.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -7,49 +8,58 @@ namespace Algorithmic_Trading.Services;
 public class StockDataService : IStockDataService
 {
     private readonly IStockDataRepository _stockDataRepository;
+    private readonly IDateTriedRepository _dateTriedRepository;
     private readonly IYFinanceService _yFinanceService;
 
-    public StockDataService(IStockDataRepository stockDataRepository, IYFinanceService yFinanceService)
+    public StockDataService(IStockDataRepository stockDataRepository, IDateTriedRepository dateTriedRepository, IYFinanceService yFinanceService)
     {
         _stockDataRepository = stockDataRepository;
+        _dateTriedRepository = dateTriedRepository;
         _yFinanceService = yFinanceService;
     }
 
     public async Task<List<StockData>> GetStockData(string ticker, DateTime startDate, DateTime endDate)
     {
-        var dates = DatesService.GetDatesInRange(startDate, endDate);
         (startDate, endDate) = DatesService.EnsureDateTimeKind(startDate, endDate);
 
         var data = _stockDataRepository.GetStockForDates(ticker, startDate, endDate);
+        var datesAlreadyTried = _dateTriedRepository.GetDatesInInterval(ticker, startDate, endDate);
+        var dates = DatesService.GetDatesInRange(startDate, endDate)
+            .Where(date => !data.Any(stock => stock.Date == date))
+            .Where(DatesService.IsWeekday)
+            .Where(date => !datesAlreadyTried.Any(dateTried => dateTried.Date == date));
 
-        if (data.Count() == dates.Count)
+        if (!dates.Any())
         {
             return await data.ToListAsync();
         }
 
-        // TODO: Make sure that dates that were tried before are not tried agian at another request
-        dates.RemoveAll(date => data.Any(stock => stock.Date == date));
-
-        var toDownloadDates = DatesService.GetStartEndDates(dates);
-
-        foreach (var dateRange in toDownloadDates)
+        try 
         {
-            try 
-            {
-                var downloadData = await _yFinanceService.DownloadHistoricalData(ticker, dateRange.startDate, dateRange.endDate);
+            var downloadData = (await _yFinanceService.DownloadHistoricalData(ticker, startDate, endDate))
+                .Where(stock => dates.Contains(stock.Date));
+
+            if(downloadData.Any()){
                 _stockDataRepository.AddRange(downloadData);
-                data = data.Union(downloadData);
-                break;
-            } 
-            catch (Exception ex) 
-            {
-                // TODO: Change to log and make proper exceptions
-                Console.WriteLine(ex.Message);
             }
+
+            var triedDates = dates.Where(date => !downloadData.Any(stock => stock.Date == date))
+                .Select(date => new DateTried(ticker, date));
+
+            if(triedDates.Any()){
+                _dateTriedRepository.AddRange(triedDates);
+            }
+        } 
+        catch (Exception ex) 
+        {
+            // TODO: Change to log and make proper exceptions
+            Console.WriteLine(ex.Message);
         }
 
-        await _stockDataRepository.Save();;
-        
-        return await data.ToListAsync();
+        await _stockDataRepository.Save();
+        await _dateTriedRepository.Save();
+
+        // TODO: Make a way to not call again the database.
+        return await GetStockData(ticker, startDate, endDate);
     }
 }

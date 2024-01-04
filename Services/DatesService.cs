@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Algorithmic_Trading.Models;
 
 namespace Algorithmic_Trading.Services;
@@ -5,20 +6,15 @@ namespace Algorithmic_Trading.Services;
 public class DatesService
 {
     // TODO: Make a way to check for holidays where the market is closed
-    public static List<DateTime> GetDatesInRange(DateTime startDate, DateTime endDate)
+    public static IEnumerable<DateTime> GetDatesInRange(DateTime startDate, DateTime endDate)
     {
-        var dates = new List<DateTime>();
-
         if(startDate.Kind != DateTimeKind.Utc){
             startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
         }
 
-        for (var date = startDate; date <= endDate; date = date.AddDays(1))
-        {
-            dates.Add(date);
-        }
-
-        return dates;
+        return Enumerable.Range(0, (endDate - startDate).Days + 1)
+            .Select(offset => startDate.AddDays(offset))
+            .ToList();
     }
 
     public static StockData EnsureDateTimeKind(StockData stockData){
@@ -61,5 +57,13 @@ public class DatesService
             .GroupBy(x => x.date.Date.AddDays(-x.index))
             .Select(group => (group.First().date, group.Last().date))
             .ToList();
+    }
+
+    public static bool IsWeekend(DateTime date){
+        return date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
+    }
+
+    public static bool IsWeekday(DateTime date){
+        return date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday;
     }
 }

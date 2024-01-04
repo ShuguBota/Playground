@@ -22,6 +22,13 @@ public class YFinanceService : IYFinanceService
                 .Select(record => new StockData(ticker, record))
                 .Select(DatesService.EnsureDateTimeKind);
         }
+
+        if (_hdp.DownloadResult == HistoricalDataDownloadResult.NoDataFound)
+        {
+            Console.WriteLine($"Server side error or there's no data for that period, for ticker {ticker} from {startDate} to {endDate}");
+
+            return Enumerable.Empty<StockData>();
+        }
         
         throw new Exception($"Failed to download historical data with code {_hdp.DownloadResult}, for ticker {ticker} from {startDate} to {endDate}");
     }

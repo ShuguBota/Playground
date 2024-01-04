@@ -13,6 +13,8 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IStockDataRepository, StockDataRepository>();
+builder.Services.AddScoped<IDateTriedRepository, DateTriedRepository>();
+
 builder.Services.AddScoped<IStockDataService, StockDataService>();
 
 builder.Services.AddSingleton<HistoricalDataProvider>();

@@ -3,6 +3,7 @@ using System;
 using Algorithmic_Trading.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algorithmic_Trading.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240103230230_DateTriedAdded")]
+    partial class DateTriedAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,13 +27,10 @@ namespace Algorithmic_Trading.Migrations
 
             modelBuilder.Entity("Algorithmic_Trading.Models.DateTried", b =>
                 {
-                    b.Property<string>("Ticker")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Ticker", "Date");
+                    b.HasKey("Date");
 
                     b.ToTable("DatesTried");
                 });

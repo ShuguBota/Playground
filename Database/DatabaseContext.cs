@@ -6,6 +6,7 @@ namespace Algorithmic_Trading.Database;
 public class DatabaseContext : DbContext
 {
     public DbSet<StockData> Stocks { get; set; }
+    public DbSet<DateTried> DatesTried { get; set; }
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options)
         : base(options)
@@ -16,5 +17,8 @@ public class DatabaseContext : DbContext
     {
         modelBuilder.Entity<StockData>()
             .HasKey(stock => new { stock.Ticker, stock.Date });
+
+        modelBuilder.Entity<DateTried>()
+            .HasKey(date => new { date.Ticker, date.Date});
     }
 }
