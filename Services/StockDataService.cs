@@ -30,6 +30,10 @@ public class StockDataService : IStockDataService
             .Where(DatesService.IsWeekday)
             .Where(date => !datesAlreadyTried.Any(dateTried => dateTried.Date == date));
 
+        var x = data.ToList();
+        var y = dates.ToList();
+        var z = datesAlreadyTried.ToList();
+
         if (!dates.Any())
         {
             return await data.ToListAsync();
@@ -40,10 +44,13 @@ public class StockDataService : IStockDataService
         try 
         {
             var downloadData = (await _yFinanceService.DownloadHistoricalData(ticker, startDate, endDate))
-                .Where(stock => dates.Contains(stock.Date));
+                // TODO: Make this filtering more efficient
+                .Where(stock => dates.Contains(stock.Date))
+                .ToList();
 
-            if(downloadData.Any()){
-                _stockDataRepository.AddRange(downloadData);
+            if(downloadData.Count != 0)
+            {
+                _stockDataRepository.BulkInsert(downloadData);
                 result.AddRange(downloadData);
             }
 
