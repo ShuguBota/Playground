@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Algorithmic_Trading.Models;
 using Algorithmic_Trading.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +33,8 @@ public class StockDataService : IStockDataService
             return await data.ToListAsync();
         }
 
+        var result = await data.ToListAsync();
+
         try 
         {
             var downloadData = (await _yFinanceService.DownloadHistoricalData(ticker, startDate, endDate))
@@ -41,6 +42,7 @@ public class StockDataService : IStockDataService
 
             if(downloadData.Any()){
                 _stockDataRepository.AddRange(downloadData);
+                result.AddRange(downloadData);
             }
 
             var triedDates = dates.Where(date => !downloadData.Any(stock => stock.Date == date))
@@ -59,7 +61,6 @@ public class StockDataService : IStockDataService
         await _stockDataRepository.Save();
         await _dateTriedRepository.Save();
 
-        // TODO: Make a way to not call again the database.
-        return await GetStockData(ticker, startDate, endDate);
+        return result;
     }
 }
