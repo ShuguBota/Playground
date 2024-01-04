@@ -56,7 +56,6 @@ public class StockDataService : IStockDataService
         } 
         catch (Exception ex) 
         {
-            // TODO: Change to log and make proper exceptions
             _logger.LogWarning("An error occurred while downloading historical data: {Message}", ex.Message);
         }
 
