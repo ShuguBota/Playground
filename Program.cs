@@ -20,6 +20,8 @@ builder.Services.AddScoped<IStockDataService, StockDataService>();
 builder.Services.AddSingleton<HistoricalDataProvider>();
 builder.Services.AddSingleton<IYFinanceService, YFinanceService>();
 
+builder.Services.AddLogging();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

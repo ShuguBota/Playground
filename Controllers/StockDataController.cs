@@ -6,14 +6,9 @@ namespace Algorithmic_Trading.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class StockDataController : ControllerBase
+public class StockDataController(IStockDataService stockDataService) : ControllerBase
 {
-    private readonly IStockDataService _stockDataService;
-
-    public StockDataController(IStockDataService stockDataService)
-    {
-        _stockDataService = stockDataService;
-    }
+    private readonly IStockDataService _stockDataService = stockDataService;
 
     [HttpGet]
     public async Task<IActionResult> GetStockData(string ticker, DateTime startDate, DateTime endDate)

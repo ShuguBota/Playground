@@ -6,12 +6,14 @@ namespace Algorithmic_Trading.Services;
 
 public class StockDataService : IStockDataService
 {
+    private readonly ILogger<StockDataService> _logger;
     private readonly IStockDataRepository _stockDataRepository;
     private readonly IDateTriedRepository _dateTriedRepository;
     private readonly IYFinanceService _yFinanceService;
 
-    public StockDataService(IStockDataRepository stockDataRepository, IDateTriedRepository dateTriedRepository, IYFinanceService yFinanceService)
+    public StockDataService(ILogger<StockDataService> logger, IStockDataRepository stockDataRepository, IDateTriedRepository dateTriedRepository, IYFinanceService yFinanceService)
     {
+        _logger = logger;
         _stockDataRepository = stockDataRepository;
         _dateTriedRepository = dateTriedRepository;
         _yFinanceService = yFinanceService;
@@ -55,7 +57,7 @@ public class StockDataService : IStockDataService
         catch (Exception ex) 
         {
             // TODO: Change to log and make proper exceptions
-            Console.WriteLine(ex.Message);
+            _logger.LogWarning("An error occurred while downloading historical data: {Message}", ex.Message);
         }
 
         await _stockDataRepository.Save();

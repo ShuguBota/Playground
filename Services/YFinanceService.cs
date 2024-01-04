@@ -3,14 +3,10 @@ using Yahoo.Finance;
 
 namespace Algorithmic_Trading.Services;
 
-public class YFinanceService : IYFinanceService
-{    
-    private readonly HistoricalDataProvider _hdp;
-
-    public YFinanceService(HistoricalDataProvider hdp)
-    {
-        _hdp = hdp;   
-    }
+public class YFinanceService(ILogger<YFinanceService> logger, HistoricalDataProvider hdp) : IYFinanceService
+{
+    private readonly ILogger<YFinanceService> _logger = logger;
+    private readonly HistoricalDataProvider _hdp = hdp;
 
     public async Task<IEnumerable<StockData>> DownloadHistoricalData(string ticker, DateTime startDate, DateTime endDate)
     {
@@ -22,10 +18,10 @@ public class YFinanceService : IYFinanceService
                 .Select(record => new StockData(ticker, record))
                 .Select(DatesService.EnsureDateTimeKind);
         }
-
+        
         if (_hdp.DownloadResult == HistoricalDataDownloadResult.NoDataFound)
         {
-            Console.WriteLine($"Server side error or there's no data for that period, for ticker {ticker} from {startDate} to {endDate}");
+            _logger.LogWarning("Server side error or there's no data for that period, for ticker {ticker} from {startDate} to {endDate}", ticker, startDate, endDate);
 
             return Enumerable.Empty<StockData>();
         }

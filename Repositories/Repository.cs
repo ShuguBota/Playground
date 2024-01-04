@@ -4,16 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Algorithmic_Trading.Repositories;
 
-public class Repository<T> : IRepository<T> where T : class
+public class Repository<T>(DatabaseContext context) : IRepository<T> where T : class
 {
-    protected readonly DatabaseContext _context;
-    protected readonly DbSet<T> _dbSet;
-
-    public Repository(DatabaseContext context)
-    {
-        _context = context;
-        _dbSet = context.Set<T>();
-    }
+    protected readonly DatabaseContext _context = context;
+    protected readonly DbSet<T> _dbSet = context.Set<T>();
 
     public IQueryable<T> GetAll()
     {
