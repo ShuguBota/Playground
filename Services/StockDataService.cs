@@ -1,6 +1,6 @@
+using System.Collections.Immutable;
 using Algorithmic_Trading.Models;
 using Algorithmic_Trading.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Algorithmic_Trading.Services;
 
@@ -23,52 +23,60 @@ public class StockDataService : IStockDataService
     {
         (startDate, endDate) = DatesService.EnsureDateTimeKind(startDate, endDate);
 
-        var data = _stockDataRepository.GetStockForDates(ticker, startDate, endDate);
-        var datesAlreadyTried = _dateTriedRepository.GetDatesInInterval(ticker, startDate, endDate);
-        var dates = DatesService.GetDatesInRange(startDate, endDate)
-            .Where(date => !data.Any(stock => stock.Date == date))
-            .Where(DatesService.IsWeekday)
-            .Where(date => !datesAlreadyTried.Any(dateTried => dateTried.Date == date));
+        List<StockData> requestedStocks = _stockDataRepository.GetStockForDates(ticker, startDate, endDate).ToList() ?? new();
+        List<DateTried> datesAlreadyTried = _dateTriedRepository.GetDatesInInterval(ticker, startDate, endDate).ToList() ?? new();
+        ImmutableHashSet<DateTime> datesMissing = DatesService.GetStockRelatedDatesInRange(startDate, endDate, requestedStocks, datesAlreadyTried);
 
-        var x = data.ToList();
-        var y = dates.ToList();
-        var z = datesAlreadyTried.ToList();
-
-        if (!dates.Any())
+        if (datesMissing.IsEmpty)
         {
-            return await data.ToListAsync();
+            return requestedStocks;
         }
 
-        var result = await data.ToListAsync();
+        HashSet<StockData> downloadedStocks = await DownloadAndFilter(datesMissing, ticker, startDate, endDate);
 
-        try 
+        UpdateStockDatabase(downloadedStocks);
+        UpdateDatesTried(downloadedStocks, datesMissing, ticker);
+        await SaveDatabaseChanges();
+
+        requestedStocks.AddRange(downloadedStocks);
+
+        return requestedStocks;
+    }
+
+    private async Task<HashSet<StockData>> DownloadAndFilter(ImmutableHashSet<DateTime> datesMissing, string ticker, DateTime startDate, DateTime endDate)
+    {
+        try
         {
-            var downloadData = (await _yFinanceService.DownloadHistoricalData(ticker, startDate, endDate))
-                // TODO: Make this filtering more efficient
-                .Where(stock => dates.Contains(stock.Date))
-                .ToList();
-
-            if(downloadData.Count != 0)
-            {
-                _stockDataRepository.BulkInsert(downloadData);
-                result.AddRange(downloadData);
-            }
-
-            var triedDates = dates.Where(date => !downloadData.Any(stock => stock.Date == date))
-                .Select(date => new DateTried(ticker, date));
-
-            if(triedDates.Any()){
-                _dateTriedRepository.AddRange(triedDates);
-            }
-        } 
-        catch (Exception ex) 
-        {
+            return (await _yFinanceService.DownloadHistoricalData(ticker, startDate, endDate))
+                .Where(stock => datesMissing.Contains(stock.Date))
+                .ToHashSet();
+        }
+        catch(Exception ex){
             _logger.LogWarning("An error occurred while downloading historical data: {Message}", ex.Message);
         }
 
+        return new();
+    }
+
+    private void UpdateDatesTried(HashSet<StockData> downloadedStocks, ImmutableHashSet<DateTime> datesMissing, string ticker)
+    {
+        var triedDates = datesMissing.Where(date => !downloadedStocks.Any(stock => stock.Date == date))
+            .Select(date => new DateTried(ticker, date));
+
+        if(triedDates.Any()){
+            _dateTriedRepository.AddRange(triedDates);
+        }
+    }
+
+    private void UpdateStockDatabase(HashSet<StockData> downloadedStocks){
+        if(downloadedStocks.Count != 0)
+        {
+            _stockDataRepository.BulkInsert([.. downloadedStocks]);
+        }
+    }
+
+    private async Task SaveDatabaseChanges(){
         await _stockDataRepository.Save();
         await _dateTriedRepository.Save();
-
-        return result;
     }
 }

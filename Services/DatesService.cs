@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Algorithmic_Trading.Models;
 
@@ -15,6 +16,16 @@ public class DatesService
         return Enumerable.Range(0, (endDate - startDate).Days + 1)
             .Select(offset => startDate.AddDays(offset))
             .ToList();
+    }
+
+    public static ImmutableHashSet<DateTime> GetStockRelatedDatesInRange(
+        DateTime startDate, DateTime endDate, List<StockData> data, List<DateTried> datesAlreadyTried)
+    {
+        return GetDatesInRange(startDate, endDate)
+            .Where(date => !data.Any(stock => stock.Date == date))
+            .Where(IsWeekday)
+            .Where(date => !datesAlreadyTried.Any(dateTried => dateTried.Date == date))
+            .ToImmutableHashSet();
     }
 
     public static StockData EnsureDateTimeKind(StockData stockData){
