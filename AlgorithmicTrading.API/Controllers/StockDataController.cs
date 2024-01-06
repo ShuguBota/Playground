@@ -1,6 +1,4 @@
-using Algorithmic_Trading.Models;
 using Microsoft.AspNetCore.Mvc;
-using Yahoo.Finance;
 
 namespace Algorithmic_Trading.Controllers;
 

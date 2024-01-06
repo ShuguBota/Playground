@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 using Algorithmic_Trading.Models;
 using Algorithmic_Trading.Repositories;

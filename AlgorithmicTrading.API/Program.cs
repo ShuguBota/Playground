@@ -1,7 +1,7 @@
-﻿using Algorithmic_Trading.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using Algorithmic_Trading.Database;
 using Algorithmic_Trading.Repositories;
 using Algorithmic_Trading.Services;
-using Microsoft.EntityFrameworkCore;
 using Yahoo.Finance;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Algorithmic_Trading.Models;
 using Yahoo.Finance;
 

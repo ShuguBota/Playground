@@ -7,7 +7,7 @@
             "type": "shell",
             "args": [
                 "build",
-                "${workspaceFolder}/Algorithmic_Trading.csproj",
+                "${workspaceFolder}/AlgorithmicTrading.API/AlgorithmicTrading.API.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

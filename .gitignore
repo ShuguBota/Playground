@@ -1,6 +1,7 @@
 # Binaries from the build
-/bin
-/obj
+**/bin
+**/obj
+
 
 # Config file
 appsettings.json
