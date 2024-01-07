@@ -1,4 +1,6 @@
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Models;
+
+namespace AlgorithmicTrading.Logic.Services;
 
 public interface IStockDataService
 {

@@ -1,6 +1,6 @@
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Models;
 
-namespace Algorithmic_Trading.Services;
+namespace AlgorithmicTrading.Logic.Services;
 
 public interface IYFinanceService
 {

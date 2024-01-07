@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
-using Algorithmic_Trading.Database;
+using AlgorithmicTrading.Data.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace Algorithmic_Trading.Repositories;
+namespace AlgorithmicTrading.Data.Repositories;
 
 public class Repository<T>(DatabaseContext context) : IRepository<T> where T : class
 {

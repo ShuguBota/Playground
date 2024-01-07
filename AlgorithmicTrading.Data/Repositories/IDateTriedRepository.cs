@@ -1,6 +1,6 @@
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Models;
 
-namespace Algorithmic_Trading.Repositories;
+namespace AlgorithmicTrading.Data.Repositories;
 
 public interface IDateTriedRepository : IRepository<DateTried>
 {

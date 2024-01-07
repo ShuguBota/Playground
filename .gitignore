@@ -5,3 +5,7 @@
 
 # Config file
 appsettings.json
+
+
+# CSV files
+**/CSVStocks

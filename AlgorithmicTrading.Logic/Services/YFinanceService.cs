@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Models;
 using Yahoo.Finance;
 
-namespace Algorithmic_Trading.Services;
+namespace AlgorithmicTrading.Logic.Services;
 
 public class YFinanceService(ILogger<YFinanceService> logger, HistoricalDataProvider hdp) : IYFinanceService
 {

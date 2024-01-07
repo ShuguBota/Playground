@@ -1,7 +1,7 @@
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Algorithmic_Trading.Database;
+namespace AlgorithmicTrading.Data.Database;
 
 public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options)
 {

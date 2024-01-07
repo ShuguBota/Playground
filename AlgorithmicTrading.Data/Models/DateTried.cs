@@ -1,4 +1,4 @@
-namespace Algorithmic_Trading.Models;
+namespace AlgorithmicTrading.Data.Models;
 
 public class DateTried {
     public string Ticker { get; set; }

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Algorithmic_Trading.Repositories;
+namespace AlgorithmicTrading.Data.Repositories;
 
 public interface IRepository<T> where T : class
 {

@@ -1,7 +1,7 @@
-using Algorithmic_Trading.Database;
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Database;
+using AlgorithmicTrading.Data.Models;
 
-namespace Algorithmic_Trading.Repositories;
+namespace AlgorithmicTrading.Data.Repositories;
 
 public class DateTriedRepository(DatabaseContext context) : Repository<DateTried>(context), IDateTriedRepository
 {

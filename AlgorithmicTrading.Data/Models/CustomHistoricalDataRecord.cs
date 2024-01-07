@@ -1,6 +1,6 @@
 using Yahoo.Finance;
 
-namespace Algorithmic_Trading.Models;
+namespace AlgorithmicTrading.Data.Models;
 
 public class CustomHistoricalDataRecord : HistoricalDataRecord 
 {

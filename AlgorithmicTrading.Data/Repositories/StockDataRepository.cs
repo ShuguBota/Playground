@@ -1,8 +1,8 @@
-using Algorithmic_Trading.Database;
-using Algorithmic_Trading.Models;
+using AlgorithmicTrading.Data.Database;
+using AlgorithmicTrading.Data.Models;
 using EFCore.BulkExtensions;
 
-namespace Algorithmic_Trading.Repositories;
+namespace AlgorithmicTrading.Data.Repositories;
 
 public class StockDataRepository(DatabaseContext _context) : Repository<StockData>(_context), IStockDataRepository
 {

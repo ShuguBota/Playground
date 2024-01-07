@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
-using Algorithmic_Trading.Models;
-using Algorithmic_Trading.Repositories;
+using AlgorithmicTrading.Data.Models;
+using AlgorithmicTrading.Data.Repositories;
 
-namespace Algorithmic_Trading.Services;
+namespace AlgorithmicTrading.Logic.Services;
 
 public class StockDataService : IStockDataService
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Algorithmic_Trading.Database;
-using Algorithmic_Trading.Repositories;
-using Algorithmic_Trading.Services;
+using AlgorithmicTrading.Data.Database;
+using AlgorithmicTrading.Data.Repositories;
+using AlgorithmicTrading.Logic.Services;
 using Yahoo.Finance;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +16,7 @@ builder.Services.AddScoped<IStockDataRepository, StockDataRepository>();
 builder.Services.AddScoped<IDateTriedRepository, DateTriedRepository>();
 
 builder.Services.AddScoped<IStockDataService, StockDataService>();
+builder.Services.AddScoped<ICsvService, CsvService>();
 
 builder.Services.AddSingleton<HistoricalDataProvider>();
 builder.Services.AddSingleton<IYFinanceService, YFinanceService>();
