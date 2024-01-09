@@ -9,3 +9,6 @@ appsettings.json
 
 # CSV files
 **/CSVStocks
+
+# Python
+/venv
