@@ -11,17 +11,22 @@ def download_data(tickers, start_date, end_date, file_name):
     data.to_csv(file_name)
 
 
-def read_stocks(file_name):
+def read_stocks(file_path):
     # Header makes the 2 columns at the top be 1
     # Index Col deals with the Date being seen as data
     # Parse Dates forms a list of date time format
-    df = pd.read_csv(file_name, header=[0, 1], index_col=[0], parse_dates=[0])
+    df = pd.read_csv(file_path, header=[0, 1], index_col=[0], parse_dates=[0])
 
     # Make the name of the columns as tuples.
     df.columns = df.columns.to_flat_index()
 
     # Converting it back to multi indexes
     df.columns = pd.MultiIndex.from_tuples(df.columns)
+
+    return df
+
+def read_stocks_raw(file_path):
+    df = pd.read_csv(file_path)
 
     return df
 

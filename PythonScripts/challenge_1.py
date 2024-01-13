@@ -39,8 +39,22 @@ def covariance_correlation_plot(stocks):
 
 # main.download_data(STOCK_TICKERS, '2015-01-01', '2023-11-06', 'stocks.csv')
 
-stocks = main.read_stocks('stocks.csv')
+stocks = main.read_stocks_raw('CSVStocks/NVDA_Stock_2000-2024.csv')
 
+stocks['Date'] = pd.to_datetime(stocks['Date'])
+
+# Set the 'Date' column as the index
+stocks.set_index('Date', inplace=True)
+
+# Plot the 'Close' column
+plt.figure(figsize=(14, 7))
+plt.plot(stocks['Close'])
+plt.title('Stock Price Over Time')
+plt.xlabel('Date')
+plt.ylabel('Close Price')
+plt.show()
+
+'''
 # Risk Reward
 risk_reward_plot(stocks)
 
@@ -48,6 +62,7 @@ risk_reward_plot(stocks)
 covariance_correlation_plot(stocks)
 
 plt.show()
+'''
 
 # Risk & Reward potential
 # Compare Covariance and Correlation
