@@ -12,7 +12,7 @@ public class StockDataController(IStockDataService stockDataService, ICsvService
     private readonly ICsvService _csvService = csvService;
 
     [HttpGet]
-    public async Task<IActionResult> GetStockData(string ticker, DateTime startDate, DateTime endDate)
+    public async Task<IActionResult> GetStockData([FromQuery]  List<string> ticker, DateTime startDate, DateTime endDate)
     {
         try{
             var data = await _stockDataService.GetStockData(ticker, startDate, endDate);
@@ -26,7 +26,7 @@ public class StockDataController(IStockDataService stockDataService, ICsvService
 
 
     [HttpGet("csv")]
-    public async Task<IActionResult> GetStockDataCsv(string ticker, DateTime startDate, DateTime endDate)
+    public async Task<IActionResult> GetStockDataCsv([FromQuery] List<string> ticker, DateTime startDate, DateTime endDate)
     {
         try
         {

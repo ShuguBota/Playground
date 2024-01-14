@@ -20,6 +20,17 @@ public class StockDataService : IStockDataService
         _yFinanceService = yFinanceService;
     }
 
+    public async Task<List<StockData>> GetStockData(List<string> tickers, DateTime startDate, DateTime endDate)
+    {
+        List<StockData> stocks = new();
+        
+        foreach(var ticker in tickers){
+            stocks.AddRange(await GetStockData(ticker, startDate, endDate));
+        }
+
+        return stocks;
+    }
+
     public async Task<List<StockData>> GetStockData(string ticker, DateTime startDate, DateTime endDate)
     {
         (startDate, endDate) = DatesService.EnsureDateTimeKind(startDate, endDate);
