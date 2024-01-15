@@ -37,22 +37,41 @@ def covariance_correlation_plot(stocks):
     sns.heatmap(close_prices.corr(), cmap='Reds', annot=True, annot_kws={'size': 15}, vmax=0.6)
 
 
+def single_close_price():
+    stocks = main.read_stocks_raw('CSVStocks/NVDA_Stock_2000-2024.csv')
+    stocks['Date'] = pd.to_datetime(stocks['Date'])
+
+    # Set the 'Date' column as the index
+    stocks.set_index('Date', inplace=True)
+
+    # Plot the 'Close' column
+    plt.figure(figsize=(14, 7))
+    plt.plot(stocks['Close'])
+    plt.title('Stock Price Over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Close Price')
+    plt.show()
+
+def multiple_close_price():
+    stocks = main.read_stocks_raw('CSVStocks/NVDA_AAPL_MSFT_Stock_2000-2024.csv')
+    stocks['Date'] = pd.to_datetime(stocks['Date'])
+
+    pivot_df = stocks.pivot_table(index='Date', columns='Ticker', values='Close')
+
+    plt.figure(figsize=(14, 7))
+
+    for column in pivot_df.columns:
+        plt.plot(pivot_df.index, pivot_df[column], label=column)
+
+    plt.title('Closing Pirce for NVCDA AAPL MSFT')
+    plt.xlabel('Date')
+    plt.ylabel('Close Price')
+    plt.legend()
+    plt.show()
+
+
 # main.download_data(STOCK_TICKERS, '2015-01-01', '2023-11-06', 'stocks.csv')
-
-stocks = main.read_stocks_raw('CSVStocks/NVDA_Stock_2000-2024.csv')
-
-stocks['Date'] = pd.to_datetime(stocks['Date'])
-
-# Set the 'Date' column as the index
-stocks.set_index('Date', inplace=True)
-
-# Plot the 'Close' column
-plt.figure(figsize=(14, 7))
-plt.plot(stocks['Close'])
-plt.title('Stock Price Over Time')
-plt.xlabel('Date')
-plt.ylabel('Close Price')
-plt.show()
+multiple_close_price()
 
 '''
 # Risk Reward
