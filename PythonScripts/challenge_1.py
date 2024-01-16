@@ -29,12 +29,16 @@ def risk_reward_plot(stocks):
     plt.title('Risk/Return', fontsize=25)
 
 
-def covariance_correlation_plot(stocks):
-    close_prices = stocks['Close'][SELECTED_TICKERS]
+def covariance_correlation_plot():
+    stocks = main.read_stocks_raw('CSVStocks/NVDA_AAPL_MSFT_Stock_2000-2024.csv')
+    stocks['Date'] = pd.to_datetime(stocks['Date'])
+
+    close_prices = stocks.pivot_table(index='Date', columns='Ticker', values='Close')
 
     plt.figure(figsize=(12, 8))
     sns.set(font_scale=1.4)
     sns.heatmap(close_prices.corr(), cmap='Reds', annot=True, annot_kws={'size': 15}, vmax=0.6)
+    plt.show()
 
 
 def single_close_price():
@@ -71,7 +75,7 @@ def multiple_close_price():
 
 
 # main.download_data(STOCK_TICKERS, '2015-01-01', '2023-11-06', 'stocks.csv')
-multiple_close_price()
+covariance_correlation_plot()
 
 '''
 # Risk Reward
