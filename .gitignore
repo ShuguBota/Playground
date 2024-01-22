@@ -7,9 +7,22 @@
 appsettings.json
 
 
-# CSV files
-**/CSVStocks
-
 # Python
 /venv
 **/__pycache__
+
+
+# CSV files
+**/CSVStocks
+
+
+# Image files
+**/Images
+
+
+# Output files
+**/Output
+
+
+# JSON files
+**/JSONFiles
