@@ -26,3 +26,9 @@ appsettings.json
 
 # JSON files
 **/JSONFiles
+
+# WebPImages
+**/WebPImages
+
+# GifImages
+**/GifImages
